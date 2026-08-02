@@ -7,6 +7,10 @@ This is the sister demostration app for [this project](https://github.com/Proxim
 This project is an [IMAP-based web email client](/app) using `FastAPI` that integrates with the model 
 for detecting phishing within the emails of the account supplied.
 
+The demo is currently hosted **using Railway** on:
+
+https://phishing-detection-demo-production.up.railway.app
+
 ## How to Login
 
 This application uses the IMAP protocol for obtaining a user's emails using **app passwords**.

@@ -15,10 +15,10 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from app.email_provider.imap import get_emails
 from app.components.bert import preprocessor, embedding_model
-from app.components.numeric import extract_numeric_features
 from app.components.explain import explain_email
+from app.components.numeric import extract_numeric_features
+from app.email_provider.imap import get_emails
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "models"
@@ -48,6 +48,7 @@ app.add_middleware(
 
 # contain imap connection and mailbox
 sessions = {}
+
 
 # request for login
 class LoginRequest(BaseModel):
@@ -192,7 +193,6 @@ def predict(request: EmailRequest):
     tokens = preprocessor(
         tf.constant([text])
     )
-
     embedding = embedding_model(
         tokens,
         training=False
@@ -203,9 +203,7 @@ def predict(request: EmailRequest):
     numeric = pd.DataFrame(
         [numeric_features]
     )
-
     numeric = numeric[feature_order]
-
     numeric = scaler.transform(
         numeric
     )
@@ -226,7 +224,6 @@ def predict(request: EmailRequest):
     predicted_class = int(
         np.argmax(prediction)
     )
-
     confidence = float(
         prediction[0][predicted_class]
     )
@@ -306,6 +303,7 @@ def inbox_page(
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 # Serve frontend assets
 app.mount(
