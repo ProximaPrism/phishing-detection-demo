@@ -304,6 +304,10 @@ def inbox_page(
     )
 
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 # Serve frontend assets
 app.mount(
     "/static",
