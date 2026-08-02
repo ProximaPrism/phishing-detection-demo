@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --frozen --dev
+
+      - name: Run unit tests
+        run: uv run pytest
+
+      - name: Run coverage
+        run: uv run pytest --cov=app --cov-report=term
+  docker:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t phishing-detector .
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name phishing \
+            -p 8000:8000 \
+            phishing-detector
+
+      - name: Wait for startup
+        run: sleep 30
+
+      - name: Health check
+        run: curl --fail http://localhost:8000/health
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker logs phishing
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f phishing
