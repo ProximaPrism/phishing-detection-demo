@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Email Classifier</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter&display=swap">
+    <link href="/static/css/inbox.css" rel="stylesheet"/>
+</head>
+<body>
+<header class="topbar">
+    <div class="brand">
+        <span>Phishing Detector</span>
+    </div>
+    <div class="search-area">
+        <div class="search-container">
+            <label for="searchBox"></label>
+            <input id="searchBox" type="text" placeholder="Search subject, sender or body...">
+        </div>
+
+        <div class="filters">
+            <button class="filter active" data-filter="all">All</button>
+            <button class="filter" data-filter="phishing">⚠ Phishing</button>
+            <button class="filter" data-filter="safe">✔ Safe</button>
+        </div>
+    </div>
+    <div class="account">
+        <span id="userEmail"></span>
+        <button id="logoutButton">
+            Logout
+        </button>
+    </div>
+</header>
+
+<div class="app">
+    <aside class="sidebar">
+        <h2>Inbox</h2>
+        <div id="emailList" class="email-list"></div>
+    </aside>
+
+    <main class="viewer">
+        <div id="emailPlaceholder" class="viewer-placeholder">
+            <h2>Loading latest email...</h2>
+            <p>
+                Please wait while your inbox loads.
+            </p>
+        </div>
+        <div id="emailContent" class="email-content hidden">
+            <div class="toolbar">
+                <h2 id="subject"></h2>
+            </div>
+            <div id="emailMeta" class="meta hidden">
+                <p>
+                    <strong>From:</strong>
+                    <span id="from"></span>
+                </p>
+                <p>
+                    <strong>Date:</strong>
+                    <span id="date"></span>
+                </p>
+            </div>
+            <div class="analysis">
+                <div id="prediction" class="badge"></div>
+            </div>
+            <div id="emailBody" class="email-body"></div>
+        </div>
+    </main>
+</div>
+<script src="/static/js/inbox.js"></script>
+</body>
+</html>

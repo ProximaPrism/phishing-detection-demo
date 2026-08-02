@@ -1,0 +1,372 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    font-family: "Inter", sans-serif;
+    background: hsl(210, 30%, 95%);
+}
+
+
+/* Email body viewer */
+.email-body {
+    margin-top: 20px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: "Fira Code", monospace;
+}
+
+
+/* Main layout */
+.app {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    height: calc(100vh - 64px);
+    min-height: 0;
+    overflow: hidden;
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+/* Sidebar */
+.sidebar {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px hsla(0, 0%, 0%, .2);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+
+.sidebar h2 {
+    padding: 20px;
+    margin: 0;
+    border-bottom: 1px solid hsl(210, 0%, 90%);
+    flex-shrink: 0;
+    font-size: 20px;
+}
+
+
+/* Email list */
+.email-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+
+/* Individual email */
+.email {
+    padding: 16px;
+    cursor: pointer;
+    border-bottom: 1px solid hsl(210, 0%, 92%);
+}
+
+
+.email:hover {
+    background: hsl(210, 40%, 97%);
+}
+
+
+.email.active {
+    background: hsl(200, 100%, 95%);
+}
+
+
+.email h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+
+.email p {
+    margin: 4px 0 0;
+    color: hsl(210, 0%, 35%);
+    font-size: 13px;
+}
+
+
+/* Header */
+.topbar {
+    height: 64px;
+    background: white;
+    border-bottom: 1px solid hsl(210, 0%, 88%);
+    display: flex;
+    align-items: center;
+    gap: 1.5em;
+    padding: 0 1em;
+    box-sizing: border-box;
+    box-shadow: 0 3px 10px hsla(0, 0%, 0%, .08);
+}
+
+
+.brand {
+    flex: 0 0 15em;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 18px;
+    white-space: nowrap;
+}
+
+
+/* Search */
+.search-area {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 16px;
+}
+
+
+.search-container {
+    flex: 1;
+    min-width: 150px;
+    max-width: 35em;
+}
+
+
+.search-container input {
+    width: 100%;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    border-radius: 22px;
+    border: 1px solid hsl(210, 0%, 70%);
+    font-size: 15px;
+    font-family: "Fira Code", sans-serif;
+}
+
+
+.search-container input:focus {
+    outline: none;
+    border-color: hsl(200, 100%, 45%);
+}
+
+
+/* Filters */
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+
+.filter {
+    width: 8em;
+    height: 38px;
+    border: none;
+    border-radius: 18px;
+    background: hsl(210, 20%, 95%);
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+
+.filter:hover {
+    background: hsl(210, 20%, 90%);
+}
+
+
+.filter.active {
+    background: hsl(200, 100%, 45%);
+    color: white;
+}
+
+
+.account {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    white-space: nowrap;
+}
+
+
+#userEmail {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+#logoutButton {
+    height: 38px;
+    border: none;
+    border-radius: 18px;
+    padding: 0 18px;
+    background: hsl(0, 85%, 55%);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+
+#logoutButton:hover {
+    background: hsl(0, 85%, 45%);
+}
+
+
+/* Email viewer */
+.viewer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    padding: 30px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px hsla(0, 0%, 0%, .15);
+}
+
+
+.viewer-placeholder {
+    flex-shrink: 0;
+}
+
+
+.email-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.meta {
+    flex-shrink: 0;
+}
+
+
+/* Prediction */
+.analysis {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    flex-shrink: 0;
+}
+
+
+.badge {
+    padding: 14px 18px;
+    border-radius: 14px;
+    font-weight: bold;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 12px hsla(0, 0%, 0%, .1);
+}
+
+
+.confidence-section {
+    margin-top: 12px;
+    padding-bottom: 12px;
+}
+
+
+.confidence-label {
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+
+.confidence-track {
+    width: 100%;
+    height: 8px;
+    background: hsla(210, 0%, 0%, .12);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+
+.confidence-fill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width .3s ease;
+}
+
+
+.confidence-fill.success {
+    background: hsl(128, 95%, 35%);
+}
+
+
+.confidence-fill.danger {
+    background: hsl(0, 100%, 45%);
+}
+
+
+.triggers {
+    padding-top: 0;
+    border-top: none;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+
+.hidden {
+    display: none;
+}
+
+
+/* Inbox prediction status */
+.status {
+    min-width: 55px;
+    text-align: center;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.status.pending {
+    background: hsl(210, 20%, 90%);
+    color: hsl(210, 0%, 45%);
+}
+
+
+.status.safe {
+    background: hsl(128, 80%, 90%);
+    color: hsl(128, 60%, 30%);
+}
+
+
+.status.phishing {
+    background: hsl(0, 80%, 92%);
+    color: hsl(0, 70%, 35%);
+}
+
+
+.safe {
+    background: hsl(128, 80%, 90%);
+    color: hsl(128, 60%, 30%);
+}
+
+
+.phishing {
+    background: hsl(0, 80%, 92%);
+    color: hsl(0, 70%, 35%);
+}
