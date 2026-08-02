@@ -1,5 +1,6 @@
 import imaplib
 import uuid
+from pathlib import Path
 from typing import Optional
 
 import joblib
@@ -14,20 +15,28 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
-from email_provider.imap import get_emails
+from app.email_provider.imap import get_emails
+from app.components.bert import preprocessor, embedding_model
+from app.components.numeric import extract_numeric_features
+from app.components.explain import explain_email
 
-# load the scaler since the scaler should be the SAME one used for training
-scaler = joblib.load("./models/scaler.pkl")
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = BASE_DIR / "models"
 
-# feature order ensures training data matches correct params
-feature_order = joblib.load("./models/feature_order.pkl")
+# Load the scaler used during training
+scaler = joblib.load(MODEL_DIR / "scaler.pkl")
 
-# load the model
+# Load feature ordering used during training
+feature_order = joblib.load(MODEL_DIR / "feature_order.pkl")
+
+# Load classifier
 keras.mixed_precision.set_global_policy("mixed_float16")
-classifier = keras.models.load_model("./models/classifier.keras", compile=False)
+classifier = keras.models.load_model(
+    MODEL_DIR / "classifier.keras",
+    compile=False
+)
 
 app = FastAPI(title="Phishing Email Model")
-
 # enable CORS just in case frontend runs separately during development
 app.add_middleware(
     CORSMiddleware,
@@ -53,12 +62,14 @@ class LoginRequest(BaseModel):
 def login(request: LoginRequest, response: Response):
     try:
         imap = imaplib.IMAP4_SSL(request.host)
+
         imap.login(
             request.username,
             request.password
         )
 
         status, _ = imap.select(request.mailbox)
+
         if status != "OK":
             imap.logout()
             return {
@@ -66,25 +77,26 @@ def login(request: LoginRequest, response: Response):
                 "message": "Unable to open mailbox."
             }
 
-        # create the user session
         session_id = str(uuid.uuid4())
+
         sessions[session_id] = {
             "connection": imap,
             "mailbox": request.mailbox,
         }
 
-        # store session in browser cookie
         response.set_cookie(
             key="session_id",
             value=session_id,
             httponly=True,
-            max_age=3600
+            max_age=3600,
+            samesite="lax"
         )
 
         return {
             "success": True,
             "email": request.username
         }
+
     except Exception as ex:
         if "Invalid credentials" in str(ex):
             return {
@@ -98,9 +110,11 @@ def login(request: LoginRequest, response: Response):
         }
 
 
-# endpoint to get the emails
 @app.get("/emails")
-def emails(offset: int = 0, session_id: str | None = Cookie(default=None)):
+def emails(
+        offset: int = 0,
+        session_id: str | None = Cookie(default=None)
+):
     if session_id is None:
         return JSONResponse(
             status_code=401,
@@ -110,9 +124,7 @@ def emails(offset: int = 0, session_id: str | None = Cookie(default=None)):
             }
         )
 
-    session = sessions.get(
-        session_id
-    )
+    session = sessions.get(session_id)
 
     if session is None:
         response = JSONResponse(
@@ -121,34 +133,39 @@ def emails(offset: int = 0, session_id: str | None = Cookie(default=None)):
                 "message": "Session expired."
             }
         )
-        response.delete_cookie(
-            "session_id"
-        )
+
+        response.delete_cookie("session_id")
+
         return response
 
     connection = session.get("connection")
+
     try:
         status, _ = connection.noop()
+
         if status != "OK":
-            raise Exception(
-                "Expired connection."
-            )
+            raise Exception("Expired connection.")
+
     except Exception:
         try:
             connection.logout()
         except Exception:
             pass
 
-        del sessions[session_id]
+        sessions.pop(
+            session_id,
+            None
+        )
+
         response = JSONResponse(
             status_code=401,
             content={
                 "message": "Session expired."
             }
         )
-        response.delete_cookie(
-            "session_id"
-        )
+
+        response.delete_cookie("session_id")
+
         return response
 
     return get_emails(
@@ -157,7 +174,6 @@ def emails(offset: int = 0, session_id: str | None = Cookie(default=None)):
     )
 
 
-# define a request format that the user will pass
 class EmailRequest(BaseModel):
     subject: str
     body: str
@@ -166,24 +182,34 @@ class EmailRequest(BaseModel):
     sent_datetime: str
 
 
-# endpoint for the prediction model
 @app.post("/predict")
 def predict(request: EmailRequest):
-    from components.bert import preprocessor, embedding_model
-    from components.numeric import extract_numeric_features
-    from components.explain import explain_email
     text = (
             request.subject +
             " [SEP] " +
             request.body
     )
-    tokens = preprocessor(tf.constant([text]))
-    embedding = embedding_model(tokens, training=False).numpy()
+
+    tokens = preprocessor(
+        tf.constant([text])
+    )
+
+    embedding = embedding_model(
+        tokens,
+        training=False
+    ).numpy()
 
     numeric_features = extract_numeric_features(request)
-    numeric = pd.DataFrame([numeric_features])
+
+    numeric = pd.DataFrame(
+        [numeric_features]
+    )
+
     numeric = numeric[feature_order]
-    numeric = scaler.transform(numeric)
+
+    numeric = scaler.transform(
+        numeric
+    )
 
     features = np.concatenate(
         [
@@ -192,12 +218,16 @@ def predict(request: EmailRequest):
         ],
         axis=1
     )
+
     prediction = classifier(
         features,
         training=False
     ).numpy()
 
-    predicted_class = int(np.argmax(prediction))
+    predicted_class = int(
+        np.argmax(prediction)
+    )
+
     confidence = float(
         prediction[0][predicted_class]
     )
@@ -212,15 +242,20 @@ def predict(request: EmailRequest):
 
 
 @app.post("/logout")
-def logout(response: Response, session_id: str | None = Cookie(default=None)):
+def logout(
+        response: Response,
+        session_id: str | None = Cookie(default=None)
+):
     if session_id is None:
         return {
             "success": True
         }
 
     session = sessions.get(session_id)
+
     if session is not None:
         connection = session.get("connection")
+
         if connection is not None:
             try:
                 connection.logout()
@@ -244,12 +279,14 @@ def logout(response: Response, session_id: str | None = Cookie(default=None)):
 @app.get("/")
 def connection_page():
     return FileResponse(
-        "templates/index.html"
+        BASE_DIR / "templates" / "index.html"
     )
 
 
 @app.get("/inbox")
-def inbox_page(session_id: str | None = Cookie(default=None)):
+def inbox_page(
+        session_id: str | None = Cookie(default=None)
+):
     if session_id is None:
         return RedirectResponse(
             "/",
@@ -263,9 +300,15 @@ def inbox_page(session_id: str | None = Cookie(default=None)):
         )
 
     return FileResponse(
-        "templates/inbox.html"
+        BASE_DIR / "templates" / "inbox.html"
     )
 
 
-# Mount the static folder so the frontend HTML/CSS/JS is served directly by FastAPI
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Serve frontend assets
+app.mount(
+    "/static",
+    StaticFiles(
+        directory=BASE_DIR / "static"
+    ),
+    name="static"
+)
