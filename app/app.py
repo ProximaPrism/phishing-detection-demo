@@ -49,7 +49,6 @@ app.add_middleware(
 # contain imap connection and mailbox
 sessions = {}
 
-
 # request for login
 class LoginRequest(BaseModel):
     host: str

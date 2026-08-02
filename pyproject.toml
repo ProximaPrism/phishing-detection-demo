@@ -18,3 +18,11 @@ dependencies = [
     "tensorflow-text>=2.20.1",
     "uvicorn>=0.52.1",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+    "."
+]
+testpaths = [
+    "tests"
+]
