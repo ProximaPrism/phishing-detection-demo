@@ -61,21 +61,3 @@ jobs:
       - name: Stop container
         if: always()
         run: docker rm -f phishing
-
-  deploy:
-    needs:
-      - test
-      - docker
-    if: github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up
